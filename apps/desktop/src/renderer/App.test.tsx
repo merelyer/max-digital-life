@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { App } from './App';
+import { App, PROACTIVE_DELAY_MAX_MS, PROACTIVE_DELAY_MIN_MS, randomProactiveDelay } from './App';
 import type { AuthSession, AuthClient } from './lib/auth';
 import type { ApiClient, ApiMemory, ApiProactiveMessage, ChatResponse } from './lib/api';
 
@@ -33,6 +33,13 @@ function makeApi(overrides: Partial<ApiSurface> = {}): ApiSurface {
 }
 
 describe('App', () => {
+  it('keeps proactive checks inside a bounded random delay window', () => {
+    expect(randomProactiveDelay(() => 0)).toBe(PROACTIVE_DELAY_MIN_MS);
+    expect(randomProactiveDelay(() => 1)).toBe(PROACTIVE_DELAY_MAX_MS);
+    expect(randomProactiveDelay(() => 0.5)).toBeGreaterThan(PROACTIVE_DELAY_MIN_MS);
+    expect(randomProactiveDelay(() => 0.5)).toBeLessThan(PROACTIVE_DELAY_MAX_MS);
+  });
+
   it('shows login before the room when no Supabase session exists', async () => {
     render(<App api={makeApi()} auth={makeAuth(null)} />);
 
@@ -45,12 +52,33 @@ describe('App', () => {
     const sendChat = vi.fn(() => new Promise<ChatResponse>((resolve) => { resolveReply = resolve; }));
     render(<App api={makeApi({ sendChat })} auth={makeAuth(session)} />);
 
-    expect(await screen.findByRole('img', { name: 'Max，白色小狗' })).toBeVisible();
+    expect(await screen.findByRole('img', { name: 'Max，动态小狗' })).toBeVisible();
     const input = screen.getByRole('textbox', { name: '和 Max 说点什么' });
     await userEvent.type(input, '今天很累');
     await userEvent.click(screen.getByRole('button', { name: '发送' }));
     expect(screen.getByRole('button', { name: '发送' })).toBeDisabled();
+    expect(screen.getByLabelText('Max 正在想事情')).toBeVisible();
     resolveReply?.({ messageId: 'm-1', text: '先休息一下。', savedMemory: false });
+  });
+
+  it('animates Max into a speaking state after a reply arrives', async () => {
+    const sendChat = vi.fn(async (): Promise<ChatResponse> => ({ messageId: 'm-2', text: '我在听。', savedMemory: false }));
+    render(<App api={makeApi({ sendChat })} auth={makeAuth(session)} />);
+
+    const input = await screen.findByRole('textbox', { name: '和 Max 说点什么' });
+    await userEvent.type(input, '你在吗');
+    await userEvent.click(screen.getByRole('button', { name: '发送' }));
+
+    await waitFor(() => expect(screen.getByRole('img', { name: 'Max，动态小狗' })).toHaveClass('max-dog-speaking'));
+  });
+
+  it('does not check the proactive inbox as soon as the room opens', async () => {
+    const checkProactive = vi.fn(async () => ({ delivered: false, message: null }));
+    render(<App api={makeApi({ checkProactive })} auth={makeAuth(session)} />);
+
+    expect(await screen.findByRole('heading', { name: '和 Max 说说话' })).toBeVisible();
+    await waitFor(() => expect(screen.getByRole('img', { name: 'Max，动态小狗' })).toBeVisible());
+    expect(checkProactive).not.toHaveBeenCalled();
   });
 
   it('removes a deleted memory from the visible list after the API confirms', async () => {

@@ -86,36 +86,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .room-note::after { position: absolute; right: 9px; bottom: -9px; width: 16px; height: 16px; border-right: 1px solid rgba(36, 51, 56, 0.12); border-bottom: 1px solid rgba(36, 51, 56, 0.12); background: #f9f0d8; content: ""; transform: rotate(45deg); }
 .room-night .room-note { color: #a3b0b1; background: #465168; }
 .room-night .room-note::after { border-color: transparent #465168 #465168 transparent; }
-.max-dog { position: absolute; z-index: 3; bottom: 34px; left: 50%; width: min(72%, 400px); height: auto; overflow: visible; fill: #fffaf0; stroke: var(--ink); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 15px 8px rgba(48, 75, 73, 0.22)); transform: translateX(-50%) rotate(-1deg); animation: max-breathe 4.8s ease-in-out infinite; }
+.max-dog { position: absolute; z-index: 3; bottom: 34px; left: 50%; width: min(58%, 250px); aspect-ratio: 192 / 208; overflow: hidden; border-radius: 0; background-color: rgba(255, 250, 241, 0.18); background-repeat: no-repeat; background-size: 800% 900%; background-position: 0 0; image-rendering: pixelated; filter: drop-shadow(0 15px 8px rgba(48, 75, 73, 0.22)); transform: translateX(-50%); animation: max-sprite-float 4.8s ease-in-out infinite, max-sprite-idle-frames 1.2s steps(6, end) infinite; }
 .max-dog:hover { filter: drop-shadow(0 17px 11px rgba(48, 75, 73, 0.28)); }
-.max-dog-thinking { animation: max-think 1.8s ease-in-out infinite; }
-.max-dog-speaking { animation: max-speak 0.72s ease-in-out 3; }
-.max-dog .dog-tail, .max-dog .dog-body, .max-dog .dog-ear, .max-dog .dog-head, .max-dog .dog-leg, .max-dog .dog-muzzle, .max-dog .dog-collar, .max-dog .dog-paw, .max-dog .dog-face { transform-box: fill-box; transform-origin: center bottom; }
-.max-dog .dog-tail { transform-origin: 14% 58%; animation: dog-tail-wag 4.4s ease-in-out infinite; }
-.max-dog .dog-tail path { fill: none; }
-.max-dog .dog-body { transform-origin: 50% 94%; animation: dog-body-breathe 4.8s ease-in-out infinite; }
-.max-dog .dog-ear-left { transform-origin: 84% 44%; animation: dog-ear-twitch 6.8s ease-in-out infinite; }
-.max-dog .dog-ear-right { transform-origin: 16% 44%; animation: dog-ear-twitch 7.3s ease-in-out -2.4s infinite; }
-.max-dog .dog-head { transform-origin: 50% 90%; animation: dog-head-bob 5s ease-in-out infinite; }
-.max-dog .dog-leg { transform-origin: 50% 6%; animation: dog-leg-sway 4.8s ease-in-out infinite; }
-.max-dog .dog-muzzle { transform-origin: 50% 50%; animation: muzzle-breathe 5s ease-in-out infinite; }
-.max-dog .dog-collar { transform-origin: 50% 10%; fill: var(--coral); animation: collar-settle 5.2s ease-in-out infinite; }
-.max-dog .dog-paw { transform-origin: 50% 0; }
-.max-dog .dog-leg-front-left { animation-delay: -0.9s; }.max-dog .dog-leg-front-right { animation-delay: -3.1s; }.max-dog .dog-leg-back-left { animation-delay: -2.1s; }.max-dog .dog-leg-back-right { animation-delay: -4s; }
-.max-dog .dog-belly-line, .max-dog .dog-chest-line, .max-dog .dog-ear-inner, .max-dog .dog-head-highlight { fill: none; }
-.max-dog .dog-belly-line, .max-dog .dog-chest-line { stroke: rgba(104, 87, 78, 0.42); stroke-width: 4; }
-.max-dog .dog-ear-inner { stroke: rgba(184, 132, 119, 0.58); stroke-width: 4; }
-.max-dog .dog-head-highlight { stroke: rgba(255, 255, 255, 0.78); stroke-width: 4; }
-.max-dog .dog-face { fill: none; stroke: var(--ink); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
-.max-dog .dog-eye { fill: var(--ink); stroke: none; transform-box: fill-box; transform-origin: center; animation: dog-blink 6.5s ease-in-out infinite; }
-.max-dog .dog-eye:nth-of-type(2) { animation-delay: -0.12s; }
-.max-dog .dog-brow { stroke-width: 4; }
-.max-dog .dog-cheek { fill: var(--coral); stroke: none; opacity: 0.38; }
-.max-dog .dog-mouth { fill: none; stroke-width: 4; }
-.max-dog .dog-tongue { fill: var(--coral); stroke: var(--ink); stroke-width: 3; transform-box: fill-box; transform-origin: 50% 0; }
-.max-dog-thinking .dog-head { animation: dog-head-think 1.8s ease-in-out infinite; }.max-dog-thinking .dog-leg-front-left { animation: dog-leg-think 1.8s ease-in-out infinite; }.max-dog-thinking .dog-tail { animation-duration: 7s; }
-.max-dog-thinking .dog-ear-right { animation: dog-ear-think 1.8s ease-in-out infinite; }
-.max-dog-speaking .dog-head { animation: dog-head-speak 0.72s ease-in-out 3; }.max-dog-speaking .dog-ear { animation: dog-ear-speak 0.72s ease-in-out 3; }.max-dog-speaking .dog-leg { animation: dog-leg-speak 0.72s ease-in-out 3; }.max-dog-speaking .dog-paw { animation: dog-paw-speak 0.72s ease-in-out 3; }.max-dog-speaking .dog-mouth { animation: dog-mouth-speak 0.72s ease-in-out 3; }.max-dog-speaking .dog-tongue { animation: dog-tongue-speak 0.72s ease-in-out 3; }
+.max-dog[data-sprite-row="idle"] { background-position: 0 0; }
+.max-dog[data-sprite-row="waiting"] { background-position: 0 75%; animation: max-sprite-think 1.8s ease-in-out infinite, max-sprite-waiting-frames 1.2s steps(6, end) infinite; }
+.max-dog[data-sprite-row="waving"] { background-position: 0 37.5%; animation: max-sprite-speak 0.72s ease-in-out 3, max-sprite-waving-frames 0.72s steps(4, end) 3; }
+.max-dog-speaking { animation-iteration-count: 3, 3; }
 .room-activity { position: absolute; z-index: 4; right: 24px; top: 208px; padding: 6px 9px; border: 1px solid rgba(255, 250, 241, 0.62); border-radius: 999px; color: rgba(61, 91, 88, 0.72); background: rgba(255, 250, 241, 0.54); font-size: 10px; letter-spacing: 0.04em; opacity: 0; transform: translateY(5px); transition: opacity 240ms ease, transform 240ms ease; }
 .scene-thinking .room-activity, .scene-speaking .room-activity { opacity: 1; transform: translateY(0); }
 .room-night .room-activity { color: rgba(238, 245, 255, 0.78); border-color: rgba(232, 239, 255, 0.24); background: rgba(51, 65, 91, 0.7); }
@@ -162,6 +138,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 @keyframes max-breathe { 0%, 100% { transform: translateX(-50%) rotate(-3deg) translateY(0) scale(1); } 50% { transform: translateX(-50%) rotate(-1deg) translateY(-5px) scale(1.012); } }
 @keyframes max-think { 0%, 100% { transform: translateX(-50%) rotate(-3deg) translateY(0); } 35% { transform: translateX(-50%) rotate(-7deg) translateY(-7px); } 70% { transform: translateX(-50%) rotate(1deg) translateY(-3px); } }
 @keyframes max-speak { 0%, 100% { transform: translateX(-50%) rotate(-3deg) translateY(0); } 35% { transform: translateX(-50%) rotate(2deg) translateY(-9px); } 68% { transform: translateX(-50%) rotate(-1deg) translateY(-4px); } }
+@keyframes max-sprite-float { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-5px); } }
+@keyframes max-sprite-think { 0%, 100% { transform: translateX(-50%) rotate(0); } 35% { transform: translateX(-50%) rotate(-4deg) translateY(-4px); } 70% { transform: translateX(-50%) rotate(2deg) translateY(-2px); } }
+@keyframes max-sprite-speak { 0%, 100% { transform: translateX(-50%) translateY(0); } 35% { transform: translateX(-50%) translateY(-8px) rotate(2deg); } 68% { transform: translateX(-50%) translateY(-3px) rotate(-1deg); } }
+@keyframes max-sprite-idle-frames { from { background-position: 0 0; } to { background-position: 100% 0; } }
+@keyframes max-sprite-waiting-frames { from { background-position: 0 75%; } to { background-position: 100% 75%; } }
+@keyframes max-sprite-waving-frames { from { background-position: 0 37.5%; } to { background-position: 100% 37.5%; } }
 @keyframes book-wiggle { 0%, 100% { transform: rotate(4deg) translateY(0); } 50% { transform: rotate(2deg) translateY(-3px); } }
 @keyframes mug-settle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 @keyframes mug-glint { 0%, 75%, 100% { opacity: 0.7; } 83% { opacity: 1; transform: scale(1.1); } }
@@ -231,4 +213,5 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .max-dog { animation: none !important; background-position: 0 0 !important; }
 }
