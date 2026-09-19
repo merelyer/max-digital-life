@@ -1,8 +1,10 @@
 import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
 export default [
   {
     ignores: ['node_modules/**', 'dist/**', 'out/**', 'coverage/**']
   },
-  js.configs.recommended
+  js.configs.recommended,
+  ...tseslint.configs.recommended
 ];
