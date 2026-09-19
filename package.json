@@ -4,7 +4,7 @@
   "packageManager": "pnpm@11.19.0",
   "scripts": {
     "lint": "pnpm -r lint",
-    "test": "pnpm -r test && node --test tests/workspace.test.mjs tests/e2e/acceptance.test.mjs",
+    "test": "pnpm -r test && node --test tests/workspace.test.mjs tests/e2e/acceptance.test.mjs tests/e2e/desktop-startup.test.mjs",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
     "package:win": "pnpm --filter @max/desktop package:win",
