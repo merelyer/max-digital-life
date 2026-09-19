@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { MemoryDraft } from '@max/domain';
-import type { MemoryRecord, MemoryStore } from './repositories/memory-repository';
-import type { ProactiveMessage, ProactiveMessageDraft, ProactiveMessageStore } from './repositories/proactive-repository';
+import type { MemoryRecord, MemoryStore } from './repositories/memory-repository.js';
+import type { ProactiveMessage, ProactiveMessageDraft, ProactiveMessageStore } from './repositories/proactive-repository.js';
 
 export type ServiceClient = SupabaseClient;
 

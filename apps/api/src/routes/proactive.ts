@@ -1,10 +1,10 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { authenticateRequest, type AuthVerifier } from '../auth';
-import type { PreferenceRepository } from '../repositories/preference-repository';
-import type { ProactiveMessageRepository, ProactiveReason } from '../repositories/proactive-repository';
-import type { ProactiveService } from '../services/proactive-service';
-import { ModelUnavailableError } from '../services/errors';
+import { authenticateRequest, type AuthVerifier } from '../auth.js';
+import type { PreferenceRepository } from '../repositories/preference-repository.js';
+import type { ProactiveMessageRepository, ProactiveReason } from '../repositories/proactive-repository.js';
+import type { ProactiveService } from '../services/proactive-service.js';
+import { ModelUnavailableError } from '../services/errors.js';
 
 const preferenceSchema = z.object({ enabled: z.boolean() }).strict();
 const runSchema = z.object({

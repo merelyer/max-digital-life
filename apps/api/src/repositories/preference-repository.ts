@@ -1,4 +1,4 @@
-import type { ServiceClient } from '../supabase';
+import type { ServiceClient } from '../supabase.js';
 
 export type NotificationPreference = { proactiveEnabled: boolean };
 

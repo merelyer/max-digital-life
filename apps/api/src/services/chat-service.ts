@@ -1,8 +1,8 @@
 import { memoryKinds, isMemoryDraft, type MemoryDraft } from '@max/domain';
 import { z } from 'zod';
-import type { ConversationRepository } from '../repositories/conversation-repository';
-import type { MemoryRecord, MemoryRepository } from '../repositories/memory-repository';
-import { MemoryUnavailableError, ModelUnavailableError } from './errors';
+import type { ConversationRepository } from '../repositories/conversation-repository.js';
+import type { MemoryRecord, MemoryRepository } from '../repositories/memory-repository.js';
+import { MemoryUnavailableError, ModelUnavailableError } from './errors.js';
 
 export type ChatMessage = {
   role: 'system' | 'user' | 'assistant';

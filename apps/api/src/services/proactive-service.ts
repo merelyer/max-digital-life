@@ -1,6 +1,6 @@
 import { shouldDeliverProactiveMessage } from '@max/domain';
-import type { ProactiveMessage, ProactiveMessageRepository, ProactiveReason } from '../repositories/proactive-repository';
-import type { ChatModel } from './chat-service';
+import type { ProactiveMessage, ProactiveMessageRepository, ProactiveReason } from '../repositories/proactive-repository.js';
+import type { ChatModel } from './chat-service.js';
 
 export type ProactiveRunInput = {
   userId: string;

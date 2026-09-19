@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { authenticateRequest, type AuthVerifier } from '../auth';
-import { ChatService, type ChatResponse } from '../services/chat-service';
-import { MemoryUnavailableError, ModelUnavailableError } from '../services/errors';
+import { authenticateRequest, type AuthVerifier } from '../auth.js';
+import { ChatService, type ChatResponse } from '../services/chat-service.js';
+import { MemoryUnavailableError, ModelUnavailableError } from '../services/errors.js';
 
 const chatRequestSchema = z.object({
   conversationId: z.string().trim().min(1).max(100),

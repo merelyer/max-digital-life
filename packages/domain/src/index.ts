@@ -1,3 +1,3 @@
-export * from './memory';
-export * from './proactive';
-export * from './world';
+export * from './memory.js';
+export * from './proactive.js';
+export * from './world.js';

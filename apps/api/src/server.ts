@@ -1,19 +1,19 @@
 import { pathToFileURL } from 'node:url';
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
-import { createSupabaseAuthVerifier, type AuthVerifier } from './auth';
-import { loadConfig, type ServerConfig } from './config';
-import { registerChatRoute } from './routes/chat';
-import { registerProactiveRoutes, type ProactiveRouteDependencies } from './routes/proactive';
-import { registerMemoryRoutes } from './routes/memories';
-import { createConversationRepository } from './repositories/conversation-repository';
-import { MemoryRepository } from './repositories/memory-repository';
-import { createSupabaseMemoryStore, createServiceClient, createSupabaseProactiveMessageStore } from './supabase';
-import { createPreferenceRepository } from './repositories/preference-repository';
-import { createProactiveMessageRepository } from './repositories/proactive-repository';
-import { ChatService } from './services/chat-service';
-import { ProactiveService } from './services/proactive-service';
-import { TokendanceClient } from './services/tokendance-client';
+import { createSupabaseAuthVerifier, type AuthVerifier } from './auth.js';
+import { loadConfig, type ServerConfig } from './config.js';
+import { registerChatRoute } from './routes/chat.js';
+import { registerProactiveRoutes, type ProactiveRouteDependencies } from './routes/proactive.js';
+import { registerMemoryRoutes } from './routes/memories.js';
+import { createConversationRepository } from './repositories/conversation-repository.js';
+import { MemoryRepository } from './repositories/memory-repository.js';
+import { createSupabaseMemoryStore, createServiceClient, createSupabaseProactiveMessageStore } from './supabase.js';
+import { createPreferenceRepository } from './repositories/preference-repository.js';
+import { createProactiveMessageRepository } from './repositories/proactive-repository.js';
+import { ChatService } from './services/chat-service.js';
+import { ProactiveService } from './services/proactive-service.js';
+import { TokendanceClient } from './services/tokendance-client.js';
 
 export type ChatServerDependencies = {
   auth: AuthVerifier;

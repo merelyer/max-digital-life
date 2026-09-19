@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
-import { authenticateRequest, type AuthVerifier } from '../auth';
-import type { MemoryRepository } from '../repositories/memory-repository';
+import { authenticateRequest, type AuthVerifier } from '../auth.js';
+import type { MemoryRepository } from '../repositories/memory-repository.js';
 
 export type MemoryRouteDependencies = {
   auth: AuthVerifier;

@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { ServiceClient } from './supabase';
+import type { ServiceClient } from './supabase.js';
 
 export type AuthVerifier = {
   verify(token: string): Promise<string | null>;

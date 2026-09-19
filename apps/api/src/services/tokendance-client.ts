@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
-import { tokendanceBaseURL, type ServerConfig } from '../config';
-import { ModelUnavailableError } from './errors';
-import type { ChatCompletionInput, ChatModel } from './chat-service';
+import { tokendanceBaseURL, type ServerConfig } from '../config.js';
+import { ModelUnavailableError } from './errors.js';
+import type { ChatCompletionInput, ChatModel } from './chat-service.js';
 
 export class TokendanceClient implements ChatModel {
   private readonly client: OpenAI;
