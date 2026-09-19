@@ -72,9 +72,14 @@ export function createConfiguredApiServer(config: ServerConfig = loadConfig()): 
   });
 }
 
+export function getServerPort(env: { PORT?: string } = process.env): number {
+  const port = Number(env.PORT ?? 3100);
+  return Number.isInteger(port) && port > 0 && port <= 65535 ? port : 3100;
+}
+
 export async function startServer(): Promise<void> {
   const app = createConfiguredApiServer();
-  await app.listen({ host: process.env.API_HOST ?? '0.0.0.0', port: 3100 });
+  await app.listen({ host: process.env.API_HOST ?? '0.0.0.0', port: getServerPort() });
 }
 
 const entryPoint = process.argv[1] ? pathToFileURL(process.argv[1]).href : '';
