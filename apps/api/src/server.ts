@@ -74,7 +74,7 @@ export function createConfiguredApiServer(config: ServerConfig = loadConfig()): 
 
 export async function startServer(): Promise<void> {
   const app = createConfiguredApiServer();
-  await app.listen({ host: '127.0.0.1', port: 3100 });
+  await app.listen({ host: process.env.API_HOST ?? '0.0.0.0', port: 3100 });
 }
 
 const entryPoint = process.argv[1] ? pathToFileURL(process.argv[1]).href : '';
