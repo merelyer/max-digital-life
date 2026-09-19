@@ -47,6 +47,7 @@ create table public.proactive_messages (
   user_id uuid not null references auth.users(id) on delete cascade,
   reason text not null check (reason in ('evening_check_in', 'unfinished_topic')),
   content text not null check (char_length(content) between 1 and 1200),
+  source_timestamp timestamptz not null default now(),
   delivered_at timestamptz not null default now(),
   dismissed_at timestamptz
 );
