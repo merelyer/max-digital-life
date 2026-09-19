@@ -1,0 +1,37 @@
+{
+  "name": "@max/desktop",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "build": "electron-vite build",
+    "dev": "electron-vite dev",
+    "lint": "eslint src",
+    "package:win": "pnpm build && electron-builder --win nsis",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@max/domain": "workspace:*",
+    "@supabase/supabase-js": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@electron-toolkit/utils": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "electron-vite": "latest",
+    "jsdom": "latest",
+    "typescript": "5.9.3",
+    "vitest": "5.0.1"
+  }
+}
