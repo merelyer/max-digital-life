@@ -1,0 +1,19 @@
+{
+  "name": "max-digital-life",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test && node --test tests/workspace.test.mjs",
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build",
+    "package:win": "pnpm --filter @max/desktop package:win",
+    "verify:secrets": "node scripts/verify-no-secrets.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "eslint": "latest",
+    "typescript": "latest",
+    "vitest": "latest"
+  }
+}
