@@ -25,8 +25,8 @@ export class ProactiveService {
   }
 
   public async runForUser(input: ProactiveRunInput): Promise<ProactiveMessage | null> {
-    const reason = input.reason ?? 'evening_check_in';
-    if (!shouldDeliverProactiveMessage({ enabled: input.enabled, deliveredToday: input.deliveredToday, hasReason: Boolean(reason) })) return null;
+    const reason = input.reason;
+    if (!reason || !shouldDeliverProactiveMessage({ enabled: input.enabled, deliveredToday: input.deliveredToday, hasReason: true })) return null;
 
     const deliveredAt = this.now().toISOString();
     const sourceTimestamp = input.sourceTimestamp ?? deliveredAt;

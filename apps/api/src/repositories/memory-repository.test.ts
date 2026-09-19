@@ -23,4 +23,15 @@ describe('MemoryRepository', () => {
     await expect(repository.delete('u-2', 'm-1')).resolves.toBe(false);
     await expect(repository.delete('u-1', 'm-1')).resolves.toBe(true);
   });
+
+  it('retrieves a Chinese memory when the current message shares meaningful characters', async () => {
+    const rows: MemoryRecord[] = [{ id: 'm-1', userId: 'u-1', content: '用户正在准备高数考试。', kind: 'study', importance: 4, createdAt: '2026-09-19T00:00:00.000Z' }];
+    const repository = new MemoryRepository({
+      list: async () => rows,
+      delete: async () => false,
+      create: async () => rows[0]!
+    });
+
+    await expect(repository.listRelevant('u-1', '今天高数复习很焦虑。')).resolves.toEqual(rows);
+  });
 });

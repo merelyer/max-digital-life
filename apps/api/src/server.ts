@@ -1,9 +1,11 @@
 import { pathToFileURL } from 'node:url';
 import Fastify, { type FastifyInstance } from 'fastify';
+import cors from '@fastify/cors';
 import { createSupabaseAuthVerifier, type AuthVerifier } from './auth';
 import { loadConfig, type ServerConfig } from './config';
 import { registerChatRoute } from './routes/chat';
 import { registerProactiveRoutes, type ProactiveRouteDependencies } from './routes/proactive';
+import { registerMemoryRoutes } from './routes/memories';
 import { createConversationRepository } from './repositories/conversation-repository';
 import { MemoryRepository } from './repositories/memory-repository';
 import { createSupabaseMemoryStore, createServiceClient, createSupabaseProactiveMessageStore } from './supabase';
@@ -18,17 +20,20 @@ export type ChatServerDependencies = {
   chatService: ChatService | { reply(input: { userId: string; conversationId: string; text: string }): Promise<{ messageId: string; text: string; savedMemory: boolean }> };
 };
 
-export type ApiServerDependencies = ChatServerDependencies & Omit<ProactiveRouteDependencies, 'auth'>;
+export type ApiServerDependencies = ChatServerDependencies & Omit<ProactiveRouteDependencies, 'auth'> & { memoryRepository: Pick<MemoryRepository, 'listRelevant' | 'delete'> };
 
 export function createChatServer(dependencies: ChatServerDependencies): FastifyInstance {
   const app = Fastify({ logger: false });
+  void app.register(cors, { origin: ['null', 'http://localhost:5173', 'http://127.0.0.1:5173'] });
   registerChatRoute(app, dependencies);
   return app;
 }
 
 export function createApiServer(dependencies: ApiServerDependencies): FastifyInstance {
   const app = Fastify({ logger: false });
+  void app.register(cors, { origin: ['null', 'http://localhost:5173', 'http://127.0.0.1:5173'] });
   registerChatRoute(app, dependencies);
+  registerMemoryRoutes(app, dependencies);
   registerProactiveRoutes(app, dependencies);
   return app;
 }
@@ -59,6 +64,7 @@ export function createConfiguredApiServer(config: ServerConfig = loadConfig()): 
   return createApiServer({
     auth: createSupabaseAuthVerifier(client),
     chatService,
+    memoryRepository,
     cronSecret: config.API_CRON_SECRET,
     preferenceRepository: createPreferenceRepository(client),
     proactiveRepository,

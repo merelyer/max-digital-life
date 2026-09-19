@@ -91,6 +91,17 @@ export function createSupabaseProactiveMessageStore(client: ServiceClient): Proa
         .order('delivered_at', { ascending: false });
       if (error) throw error;
       return (data ?? []).map(toProactiveMessage);
+    },
+    async dismiss(userId, messageId) {
+      const { data, error } = await client
+        .from('proactive_messages')
+        .update({ dismissed_at: new Date().toISOString() })
+        .eq('id', messageId)
+        .eq('user_id', userId)
+        .is('dismissed_at', null)
+        .select('id');
+      if (error) throw error;
+      return (data ?? []).length > 0;
     }
   };
 }

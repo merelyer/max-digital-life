@@ -10,7 +10,8 @@ function makeRepository() {
   const repository: ProactiveMessageRepository = {
     countDeliveredSince: async () => 0,
     create,
-    listUndismissed: async () => []
+    listUndismissed: async () => [],
+    dismiss: async () => true
   };
   return { repository, create };
 }

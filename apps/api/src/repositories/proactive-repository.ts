@@ -21,6 +21,7 @@ export type ProactiveMessageStore = {
   countDeliveredSince(userId: string, since: string, until: string): Promise<number>;
   create(userId: string, draft: ProactiveMessageDraft): Promise<ProactiveMessage>;
   listUndismissed(userId: string): Promise<ProactiveMessage[]>;
+  dismiss(userId: string, messageId: string): Promise<boolean>;
 };
 
 export type ProactiveMessageRepository = ProactiveMessageStore;
