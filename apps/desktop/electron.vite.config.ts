@@ -11,5 +11,5 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()]
   },
   preload: { build: { rollupOptions: { input: resolve(rootDir, 'src/main/preload.ts') } }, plugins: [externalizeDepsPlugin()] },
-  renderer: { resolve: { alias: { '@renderer': resolve('src/renderer') } }, plugins: [react()] }
+  renderer: { publicDir: resolve(rootDir, 'public'), resolve: { alias: { '@renderer': resolve('src/renderer') } }, plugins: [react()] }
 });
