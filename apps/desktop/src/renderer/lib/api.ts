@@ -51,7 +51,7 @@ export class ApiClient {
     this.getAccessToken = options.getAccessToken;
     this.conversationId = options.conversationId ?? createConversationId();
     this.timezone = options.timezone ?? (() => Intl.DateTimeFormat().resolvedOptions().timeZone);
-    this.fetchImpl = options.fetchImpl ?? fetch;
+    this.fetchImpl = options.fetchImpl ?? ((input, init) => globalThis.fetch(input, init));
   }
 
   public sendChat(text: string): Promise<ChatResponse> {
