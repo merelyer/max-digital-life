@@ -31,6 +31,7 @@ export function MaxRoom(props: { memoryCount: number; activity?: RoomActivity })
           <div className="room-window-view" data-testid="room-window"><i /><i /><i /></div>
           <div className="room-plant"><span /><span /><span /></div>
           <div className="room-poster"><b>M</b><small>stay soft</small></div>
+          <div className="room-pixel-details" data-testid="room-pixel-details" aria-hidden="true"><i /><i /><i /><i /><i /></div>
         </div>
         <div className="room-sunbeam" aria-hidden="true" />
         <div className="room-specks" data-testid="room-specks" aria-hidden="true"><i /><i /><i /><i /><i /></div>

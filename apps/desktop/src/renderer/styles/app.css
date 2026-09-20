@@ -328,3 +328,96 @@ body {
   .room-scene { height: 400px; }
   .memory-list { grid-template-columns: 1fr; }
 }
+
+/* Max 的待机动作低频切换：一段时间安静不动，再偶尔换一个自然姿势。 */
+.max-dog.max-dog-idle {
+  animation: max-dog-settle 8.5s ease-in-out infinite, max-sprite-idle-frames 5.4s steps(5, end) infinite;
+}
+.max-dog.max-dog-idle-behavior-settle { background-position: 0 0; }
+.max-dog.max-dog-idle-behavior-rest {
+  background-position: 0 62.5%;
+  animation: max-dog-rest 5.6s ease-in-out 1 forwards, max-sprite-rest-frames 5.6s steps(6, end) 1 forwards;
+}
+.max-dog.max-dog-idle-behavior-wander {
+  background-position: 0 87.5%;
+  animation: max-dog-wander 4.4s ease-in-out 1 forwards, max-sprite-wander-frames 4.4s steps(7, end) 1 forwards;
+}
+.max-dog.max-dog-idle-behavior-look {
+  background-position: 0 37.5%;
+  animation: max-dog-look 2.4s ease-in-out 1 forwards, max-sprite-look-frames 2.4s steps(5, end) 1 forwards;
+}
+
+@keyframes max-dog-settle {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-2px); }
+}
+@keyframes max-dog-rest {
+  0% { transform: translateX(-50%) translateY(0) rotate(0); }
+  46% { transform: translateX(-50%) translateY(3px) rotate(-2deg); }
+  100% { transform: translateX(-50%) translateY(5px) rotate(-1deg); }
+}
+@keyframes max-dog-wander {
+  0% { transform: translateX(-50%) translateY(0); }
+  18% { transform: translateX(calc(-50% - 10px)) translateY(-1px); }
+  58% { transform: translateX(calc(-50% + 10px)) translateY(0); }
+  100% { transform: translateX(-50%) translateY(0); }
+}
+@keyframes max-dog-look {
+  0%, 100% { transform: translateX(-50%) rotate(0); }
+  42% { transform: translateX(-50%) rotate(-3deg) translateY(-2px); }
+  70% { transform: translateX(-50%) rotate(2deg) translateY(0); }
+}
+@keyframes max-sprite-rest-frames { from { background-position: 0 62.5%; } to { background-position: 71.4286% 62.5%; } }
+@keyframes max-sprite-wander-frames { from { background-position: 0 87.5%; } to { background-position: 71.4286% 87.5%; } }
+@keyframes max-sprite-look-frames { from { background-position: 0 37.5%; } to { background-position: 57.1429% 37.5%; } }
+
+/* 像素房间细节：用硬边小块和重复纹理增加空间层次。 */
+.room-backdrop::after {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(90deg, rgba(100, 71, 51, 0.09) 1px, transparent 1px),
+    linear-gradient(rgba(255, 246, 226, 0.12) 1px, transparent 1px);
+  background-size: 32px 32px;
+  content: "";
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.room-pixel-details { position: absolute; z-index: 1; right: 22px; bottom: 202px; width: 52px; height: 34px; }
+.room-pixel-details i { position: absolute; width: 6px; height: 6px; background: #8b6a51; box-shadow: 0 0 0 1px rgba(255, 241, 214, 0.22); opacity: 0.78; }
+.room-pixel-details i:nth-child(1) { top: 1px; left: 4px; box-shadow: 12px 5px #a77e5c, 26px -2px #7f9676, 38px 9px #b66e54; }
+.room-pixel-details i:nth-child(2) { top: 17px; left: 19px; box-shadow: 15px 5px #c08b63, -11px -4px #7f9676; }
+.room-pixel-details i:nth-child(3) { top: 24px; left: 3px; }
+.room-pixel-details i:nth-child(4) { top: 8px; left: 47px; }
+.room-pixel-details i:nth-child(5) { top: 27px; left: 42px; }
+.room-floor {
+  background:
+    repeating-linear-gradient(90deg, rgba(77, 49, 37, 0.12) 0 3px, transparent 3px 62px),
+    repeating-linear-gradient(0deg, rgba(255, 227, 190, 0.12) 0 2px, transparent 2px 31px),
+    linear-gradient(180deg, #ac7657, #8a5b48);
+}
+.room-floor::before {
+  position: absolute;
+  inset: 13px 0 0;
+  background: repeating-linear-gradient(90deg, transparent 0 82px, rgba(87, 52, 38, 0.2) 82px 86px, transparent 86px 151px);
+  content: "";
+  opacity: 0.75;
+}
+.room-floor::after {
+  position: absolute;
+  right: 18%;
+  bottom: 38px;
+  width: 8px;
+  height: 8px;
+  background: #d09a6b;
+  box-shadow: -84px 12px 0 #93604a, -180px -9px 0 #c48a64, 118px 23px 0 #82533f;
+  content: "";
+}
+.room-carpet {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 202, 156, 0.16) 0 7px, transparent 7px 21px),
+    repeating-linear-gradient(0deg, rgba(99, 45, 39, 0.12) 0 5px, transparent 5px 17px),
+    #b65245;
+}
+.room-night .room-backdrop::after { opacity: 0.14; mix-blend-mode: screen; }

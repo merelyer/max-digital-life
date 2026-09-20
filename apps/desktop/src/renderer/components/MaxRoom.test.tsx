@@ -31,6 +31,7 @@ describe('MaxRoom', () => {
     expect(screen.getByTestId('room-window')).toBeVisible();
     expect(screen.getByTestId('room-shelf')).toBeVisible();
     expect(screen.getByTestId('room-floor')).toBeVisible();
+    expect(screen.getByTestId('room-pixel-details')).toBeVisible();
     expect(screen.getByRole('heading', { name: 'Max 在暖木书房等你' })).toBeVisible();
   });
 
