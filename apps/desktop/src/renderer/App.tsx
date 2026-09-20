@@ -6,7 +6,7 @@ import { LoginPanel } from './components/LoginPanel';
 import { MaxRoom } from './components/MaxRoom';
 import { MemoryPanel } from './components/MemoryPanel';
 import { SettingsPanel } from './components/SettingsPanel';
-import type { ApiMemory, ApiProactiveMessage, ApiSurface, AuthSurface, TimelineMessage } from './types';
+import type { ApiMemory, ApiProactiveMessage, ApiSurface, AuthSurface, RoomActivity, TimelineMessage } from './types';
 import './styles/app.css';
 
 export type AppProps = { api?: ApiSurface; auth?: AuthSurface };
@@ -17,7 +17,9 @@ export function App(props: AppProps): ReactElement {
   const [session, setSession] = useState<AuthSession | null | undefined>(undefined);
   const [memories, setMemories] = useState<ApiMemory[]>([]);
   const [messages, setMessages] = useState<TimelineMessage[]>([]);
+  const [roomActivity, setRoomActivity] = useState<RoomActivity>('idle');
   const [proactiveEnabled, setProactiveEnabled] = useState(true);
+  const [proactivePreferenceReady, setProactivePreferenceReady] = useState(false);
   const seenInbox = useRef(new Set<string>());
 
   useEffect(() => {
@@ -27,8 +29,29 @@ export function App(props: AppProps): ReactElement {
   }, [auth]);
 
   useEffect(() => {
-    if (!session) return undefined;
+    if (!session) {
+      setProactivePreferenceReady(false);
+      return undefined;
+    }
     let active = true;
+    setProactivePreferenceReady(false);
+    const loadInitialData = async (): Promise<void> => {
+      const [memoriesResult, preferenceResult] = await Promise.allSettled([api.listMemories(), api.getProactiveEnabled()]);
+      if (!active) return;
+      if (memoriesResult.status === 'fulfilled') setMemories(memoriesResult.value);
+      if (preferenceResult.status === 'fulfilled') {
+        setProactiveEnabled(preferenceResult.value.enabled);
+        setProactivePreferenceReady(true);
+      }
+    };
+    void loadInitialData();
+    return () => { active = false; };
+  }, [api, session]);
+
+  useEffect(() => {
+    if (!session || !proactivePreferenceReady || !proactiveEnabled) return undefined;
+    let active = true;
+    let timer: number | undefined;
     const loadInbox = async (): Promise<void> => {
       try {
         await api.checkProactive();
@@ -39,10 +62,19 @@ export function App(props: AppProps): ReactElement {
         // The chat remains usable when the optional inbox is temporarily unavailable.
       }
     };
-    void Promise.allSettled([api.listMemories().then(setMemories), api.getProactiveEnabled().then((preference) => setProactiveEnabled(preference.enabled)), loadInbox()]);
-    const timer = window.setInterval(() => { void loadInbox(); }, 15 * 60 * 1000);
-    return () => { active = false; window.clearInterval(timer); };
-  }, [api, session]);
+    const scheduleNext = (): void => {
+      if (!active) return;
+      timer = window.setTimeout(async () => {
+        await loadInbox();
+        scheduleNext();
+      }, randomProactiveDelay());
+    };
+    scheduleNext();
+    return () => {
+      active = false;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [api, proactiveEnabled, proactivePreferenceReady, session]);
 
   if (session === undefined) return <main className="loading-shell" aria-label="正在打开 Max">正在打开 Max…</main>;
   if (!session) return <LoginPanel auth={auth} onAuthenticated={() => { void auth.getSession().then(setSession); }} />;
@@ -54,8 +86,8 @@ export function App(props: AppProps): ReactElement {
         <div className="header-actions"><span className="session-label">这台电脑 · 已连接</span><button className="text-button" type="button" onClick={() => { void auth.signOut().then(() => setSession(null)); }}>退出</button></div>
       </header>
       <main className="app-grid">
-        <MaxRoom memoryCount={memories.length} />
-        <ChatPanel api={api} messages={messages} onMessagesChange={setMessages} />
+        <MaxRoom memoryCount={memories.length} activity={roomActivity} />
+        <ChatPanel api={api} messages={messages} onMessagesChange={setMessages} onActivityChange={setRoomActivity} />
       </main>
       <footer className="utility-grid">
         <MemoryPanel api={api} memories={memories} onMemoriesChange={setMemories} />
@@ -68,12 +100,22 @@ export function App(props: AppProps): ReactElement {
 function appendInbox(inbox: ApiProactiveMessage[], seen: { current: Set<string> }, setMessages: (update: (current: TimelineMessage[]) => TimelineMessage[]) => void, api: ApiSurface): void {
   const unseen = inbox.filter((item) => !seen.current.has(item.id));
   if (unseen.length === 0) return;
-  unseen.forEach((item) => seen.current.add(item.id));
-  setMessages((current) => [...current, ...unseen.map((item) => ({ id: item.id, role: 'proactive' as const, text: item.content }))]);
-  unseen.forEach((item) => {
-    void window.maxDesktop?.showNotification({ title: 'Max', body: item.content });
-    void api.dismissProactive?.(item.id);
-  });
+  // The API returns newest first; consume the oldest pending message first so a
+  // backlog is released one at a time instead of arriving as a burst.
+  const item = unseen[unseen.length - 1];
+  if (!item) return;
+  seen.current.add(item.id);
+  setMessages((current) => [...current, { id: item.id, role: 'proactive' as const, text: item.content }]);
+  void window.maxDesktop?.showNotification({ title: 'Max', body: item.content });
+  void api.dismissProactive?.(item.id);
+}
+
+export const PROACTIVE_DELAY_MIN_MS = 20 * 60 * 1000;
+export const PROACTIVE_DELAY_MAX_MS = 50 * 60 * 1000;
+
+export function randomProactiveDelay(random: () => number = Math.random): number {
+  const sample = Math.max(0, Math.min(1, random()));
+  return Math.min(PROACTIVE_DELAY_MAX_MS, Math.floor(PROACTIVE_DELAY_MIN_MS + sample * (PROACTIVE_DELAY_MAX_MS - PROACTIVE_DELAY_MIN_MS + 1)));
 }
 
 function createDefaultAuth(): AuthSurface {

@@ -2,6 +2,20 @@ import { describe, expect, it, vi } from 'vitest';
 import { ApiClient } from './api';
 
 describe('ApiClient', () => {
+  it('calls the browser fetch function with the global receiver', async () => {
+    const fetchMock = vi.fn(function(this: unknown): Promise<Response> {
+      if (this !== globalThis) throw new TypeError("Failed to execute 'fetch' on 'Window': Illegal invocation");
+      return Promise.resolve(new Response(JSON.stringify([]), { status: 200, headers: { 'content-type': 'application/json' } }));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new ApiClient({ baseURL: 'https://api.example.test', getAccessToken: async () => 'token' });
+
+    await client.listMemories();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
+
   it('sends the Supabase access token and local timezone without any model key', async () => {
     const fetchMock = vi.fn(async () => new Response(JSON.stringify({ messageId: 'm-1', text: '晚上好', savedMemory: false }), { status: 200, headers: { 'content-type': 'application/json' } }));
     const client = new ApiClient({

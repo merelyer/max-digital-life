@@ -1,24 +1,36 @@
-import { useState, type ReactElement } from 'react';
-import type { ApiSurface, TimelineMessage } from '../types';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
+import type { ApiSurface, RoomActivity, TimelineMessage } from '../types';
 
-export function ChatPanel(props: { api: ApiSurface; messages: TimelineMessage[]; onMessagesChange: (messages: TimelineMessage[]) => void }): ReactElement {
+export function ChatPanel(props: { api: ApiSurface; messages: TimelineMessage[]; onMessagesChange: (messages: TimelineMessage[]) => void; onActivityChange?: (activity: RoomActivity) => void }): ReactElement {
   const [text, setText] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const activityTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => {
+    if (activityTimer.current !== undefined) window.clearTimeout(activityTimer.current);
+  }, []);
 
   async function send(): Promise<void> {
     const trimmed = text.trim();
     if (!trimmed || pending) return;
     setPending(true);
     setError(null);
+    props.onActivityChange?.('thinking');
     const userMessage: TimelineMessage = { id: `user-${Date.now()}`, role: 'user', text: trimmed };
     props.onMessagesChange([...props.messages, userMessage]);
     setText('');
     try {
       const response = await props.api.sendChat(trimmed);
       props.onMessagesChange([...props.messages, userMessage, { id: response.messageId, role: 'assistant', text: response.text }]);
+      props.onActivityChange?.('speaking');
+      activityTimer.current = window.setTimeout(() => {
+        props.onActivityChange?.('idle');
+        activityTimer.current = undefined;
+      }, 2200);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '这次没有收到 Max 的回复。');
+      props.onActivityChange?.('idle');
     } finally {
       setPending(false);
     }
