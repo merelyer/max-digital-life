@@ -13,4 +13,6 @@ export type TimelineMessage = {
   text: string;
 };
 
+export type RoomActivity = 'idle' | 'thinking' | 'speaking';
+
 export type { ApiMemory, ApiProactiveMessage, AuthSession, ChatResponse };
