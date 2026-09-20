@@ -21,7 +21,17 @@ describe('MaxRoom', () => {
     render(<MaxRoom memoryCount={0} activity="speaking" />);
 
     expect(screen.getByRole('img', { name: 'Max，动态小狗' })).toHaveClass('max-dog-speaking');
-    expect(screen.getByText('动态小狗，住在你的屏幕里。')).toBeVisible();
+    expect(screen.getByText('Max 在暖木书房等你')).toBeVisible();
+  });
+
+  it('anchors Max inside the warm wooden study scene', () => {
+    render(<MaxRoom memoryCount={0} />);
+
+    expect(screen.getByRole('region', { name: 'Max 的暖木书房' })).toBeVisible();
+    expect(screen.getByTestId('room-window')).toBeVisible();
+    expect(screen.getByTestId('room-shelf')).toBeVisible();
+    expect(screen.getByTestId('room-floor')).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Max 在暖木书房等你' })).toBeVisible();
   });
 
   it('keeps the local clock and room label in sync as the evening begins', () => {

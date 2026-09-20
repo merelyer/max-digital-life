@@ -13,7 +13,7 @@ const spriteRows: Record<RoomActivity, SpriteRow> = {
   speaking: 'waving',
 };
 
-const spriteSrc = '/assets/max/corgi-scout/spritesheet.webp';
+const spriteSrc = './assets/max/corgi-scout/spritesheet.webp';
 
 /** Max's local Corgi Scout sprite with activity-driven animation rows. */
 export function MaxDogSprite({ activity = 'idle' }: MaxDogSpriteProps): ReactElement {

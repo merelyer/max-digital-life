@@ -9,7 +9,7 @@ describe('MaxDogSprite', () => {
     const sprite = screen.getByRole('img', { name: 'Max，动态小狗' });
     expect(sprite).toHaveClass('max-dog', 'max-dog-idle');
     expect(sprite).toHaveAttribute('data-sprite-row', 'idle');
-    expect(sprite).toHaveAttribute('data-sprite-src', '/assets/max/corgi-scout/spritesheet.webp');
+    expect(sprite).toHaveAttribute('data-sprite-src', './assets/max/corgi-scout/spritesheet.webp');
   });
 
   it.each([
