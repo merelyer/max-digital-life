@@ -10,8 +10,6 @@ describe('MaxRoom', () => {
   it('shows a living ambient scene and a thinking cue', () => {
     render(<MaxRoom memoryCount={0} activity="thinking" />);
 
-    expect(screen.getByTestId('room-specks')).toBeVisible();
-    expect(screen.getByTestId('room-steam')).toBeVisible();
     expect(screen.getByTestId('room-backdrop')).toBeVisible();
     expect(screen.getByLabelText('Max 正在想事情')).toBeVisible();
     expect(screen.getByRole('img', { name: 'Max，动态小狗' })).toHaveClass('max-dog-thinking');
@@ -28,10 +26,7 @@ describe('MaxRoom', () => {
     render(<MaxRoom memoryCount={0} />);
 
     expect(screen.getByRole('region', { name: 'Max 的暖木书房' })).toBeVisible();
-    expect(screen.getByTestId('room-window')).toBeVisible();
-    expect(screen.getByTestId('room-shelf')).toBeVisible();
-    expect(screen.getByTestId('room-floor')).toBeVisible();
-    expect(screen.getByTestId('room-pixel-details')).toBeVisible();
+    expect(screen.getByTestId('room-backdrop')).toHaveAttribute('src', './assets/max/study-room-v2.png');
     expect(screen.getByRole('heading', { name: 'Max 在暖木书房等你' })).toBeVisible();
   });
 

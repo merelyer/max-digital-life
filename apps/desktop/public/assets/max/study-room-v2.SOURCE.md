@@ -1,0 +1,7 @@
+# Warm study background v2
+
+Generated with the built-in imagegen tool on 2026-09-20. Original resolution: 1536 x 1024. The dog is not baked into this background; the existing corgi sprite is rendered separately.
+
+## Generation prompt
+
+Use case: stylized-concept. Create a finished pixel-art game BACKGROUND asset for a desktop pet companion named Max, warm wooden study room, landscape 3:2 aspect ratio. No dogs, no people, no text or UI. Deliberate coherent 16-bit pixel art, crisp square pixels and restrained palette, no vector gradients, no blur. Straight-on slightly elevated side-view indoor room, NOT isometric. Main wall occupies upper 60%, broad clear wooden floor and large muted terracotta woven rug occupy lower 40%, EMPTY center floor reserved for an animated small corgi sprite. Tall filled bookshelf and trailing potted plant at far left, warm wooden desk with stacked books, cream mug and small green lamp at far right, wide wood-framed window upper middle showing leafy trees and afternoon sky, linen curtains, a few framed botanical pictures, soft mint-green plaster wall with wooden wainscot. Rich handcrafted furniture and readable objects, cozy lived-in reading room, layered pixel clusters and warm restrained shadows. Balanced inviting composition: detailed perimeter furniture, spacious uncluttered center rug, all floor objects kept at edges, room geometry coherent, consistent pixel grid, no characters baked in, no watermark. This will be used as full background behind a separately animated pixel dog.

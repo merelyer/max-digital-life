@@ -1,7 +1,33 @@
 import { join } from 'node:path';
 import { app, BrowserWindow, ipcMain, Notification } from 'electron';
+import { autoUpdater } from 'electron-updater';
 
 let mainWindow: BrowserWindow | null = null;
+type UpdateState = { status: 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'error' | 'disabled'; version?: string; percent?: number };
+let updateState: UpdateState = { status: app.isPackaged ? 'idle' : 'disabled' };
+
+function setUpdateState(next: UpdateState): void {
+  updateState = next;
+  mainWindow?.webContents.send('updates:state', next);
+}
+
+function configureUpdates(): void {
+  if (!app.isPackaged) return;
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = false;
+  autoUpdater.on('checking-for-update', () => setUpdateState({ status: 'checking' }));
+  autoUpdater.on('update-available', (info) => setUpdateState({ status: 'available', version: info.version }));
+  autoUpdater.on('update-not-available', () => setUpdateState({ status: 'idle' }));
+  autoUpdater.on('download-progress', (progress) => setUpdateState({ status: 'downloading', percent: Math.round(progress.percent) }));
+  autoUpdater.on('update-downloaded', (info) => setUpdateState({ status: 'downloaded', version: info.version }));
+  autoUpdater.on('error', () => setUpdateState({ status: 'error' }));
+}
+
+async function checkForUpdate(): Promise<UpdateState> {
+  if (!app.isPackaged) return updateState;
+  await autoUpdater.checkForUpdates();
+  return updateState;
+}
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -35,8 +61,21 @@ ipcMain.handle('show-notification', (_event, input: unknown) => {
   new Notification({ title: input.title, body: input.body }).show();
 });
 
+ipcMain.handle('updates:get-state', () => updateState);
+ipcMain.handle('updates:check', () => checkForUpdate());
+ipcMain.handle('updates:download', async () => {
+  if (updateState.status !== 'available') return;
+  await autoUpdater.downloadUpdate();
+});
+ipcMain.handle('updates:install', () => {
+  if (updateState.status !== 'downloaded') return;
+  autoUpdater.quitAndInstall();
+});
+
 app.whenReady().then(() => {
+  configureUpdates();
   createWindow();
+  void checkForUpdate();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });

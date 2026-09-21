@@ -1,6 +1,10 @@
 appId: space.max.room
 productName: Max
 artifactName: Max-Setup-${version}.${ext}
+publish:
+  provider: github
+  owner: merelyer
+  repo: max-digital-life
 directories:
   output: release
   buildResources: build

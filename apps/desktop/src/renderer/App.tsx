@@ -6,6 +6,7 @@ import { LoginPanel } from './components/LoginPanel';
 import { MaxRoom } from './components/MaxRoom';
 import { MemoryPanel } from './components/MemoryPanel';
 import { SettingsPanel } from './components/SettingsPanel';
+import { UpdateNotice } from './components/UpdateNotice';
 import type { ApiMemory, ApiProactiveMessage, ApiSurface, AuthSurface, RoomActivity, TimelineMessage } from './types';
 import './styles/app.css';
 
@@ -85,6 +86,7 @@ export function App(props: AppProps): ReactElement {
         <div className="brand-lockup"><span className="brand-dot" aria-hidden="true" /><div><p className="eyebrow">A DIGITAL LIFE</p><h1>max<span>/</span>room</h1></div></div>
         <div className="header-actions"><span className="session-label">这台电脑 · 已连接</span><button className="text-button" type="button" onClick={() => { void auth.signOut().then(() => setSession(null)); }}>退出</button></div>
       </header>
+      <UpdateNotice />
       <main className="app-grid">
         <MaxRoom memoryCount={memories.length} activity={roomActivity} />
         <ChatPanel api={api} messages={messages} onMessagesChange={setMessages} onActivityChange={setRoomActivity} />

@@ -1,79 +1,72 @@
-import { useEffect, useState, type ReactElement } from 'react';
+import { useEffect, useRef, useState, type ReactElement } from 'react';
 import type { RoomActivity } from '../types';
-
-type MaxDogSpriteProps = {
-  activity?: RoomActivity;
-  random?: () => number;
-};
-
-type SpriteRow = 'idle' | 'waiting' | 'waving';
-
-const spriteRows: Record<RoomActivity, SpriteRow> = {
-  idle: 'idle',
-  thinking: 'waiting',
-  speaking: 'waving',
-};
+import { DOG_CLIPS, chooseDogAction, restingDelay, type DogAction, type DogFrame } from '../lib/dog-behavior';
 
 const spriteSrc = './assets/max/corgi-scout/spritesheet.webp';
-const idleBehaviors = ['settle', 'rest', 'wander', 'look'] as const;
-type IdleBehavior = (typeof idleBehaviors)[number];
-const IDLE_BEHAVIOR_MIN_MS = 12_000;
-const IDLE_BEHAVIOR_MAX_MS = 30_000;
+type Pose = { frame: DogFrame; action: DogAction; x: number };
 
-function clampRandom(value: number): number {
-  return Math.max(0, Math.min(1, value));
-}
-
-function nextIdleDelay(random: () => number): number {
-  return Math.floor(IDLE_BEHAVIOR_MIN_MS + clampRandom(random()) * (IDLE_BEHAVIOR_MAX_MS - IDLE_BEHAVIOR_MIN_MS));
-}
-
-function chooseNextIdleBehavior(current: IdleBehavior, random: () => number): IdleBehavior {
-  const choices = idleBehaviors.filter((behavior) => behavior !== current);
-  const index = Math.min(choices.length - 1, Math.floor(clampRandom(random()) * choices.length));
-  return choices[index] ?? 'settle';
-}
-
-/** Max's local Corgi Scout sprite with activity-driven animation rows. */
-export function MaxDogSprite({ activity = 'idle', random = Math.random }: MaxDogSpriteProps): ReactElement {
-  const row = spriteRows[activity];
-  const [idleBehavior, setIdleBehavior] = useState<IdleBehavior>('settle');
-
+export function MaxDogSprite({ activity = 'idle', random = Math.random }: { activity?: RoomActivity; random?: () => number }): ReactElement {
+  const position = useRef(0.5);
+  const [pose, setPose] = useState<Pose>({ frame: [0, 0], action: 'sit', x: 0.5 });
   useEffect(() => {
-    if (activity !== 'idle') {
-      setIdleBehavior('settle');
-      return undefined;
-    }
-
-    let active = true;
     let timer: number | undefined;
-    const scheduleNext = (): void => {
-      timer = window.setTimeout(() => {
-        if (!active) return;
-        setIdleBehavior((current) => chooseNextIdleBehavior(current, random));
-        scheduleNext();
-      }, nextIdleDelay(random));
+    let stopped = false;
+    const motion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    const clear = (): void => { if (timer !== undefined) window.clearTimeout(timer); };
+    const show = (frame: DogFrame, action: DogAction): void => {
+      setPose({ frame, action, x: position.current });
     };
-
-    scheduleNext();
+    const later = (fn: () => void, ms: number): void => {
+      clear();
+      if (!stopped && !document.hidden && !motion?.matches) timer = window.setTimeout(fn, ms);
+    };
+    const rest = (sleeping = false): void => {
+      show(sleeping ? [5, 3] : [0, 0], sleeping ? 'sleep' : 'sit');
+      later(() => play(chooseDogAction(random())), restingDelay(random(), sleeping));
+    };
+    const play = (action: DogAction): void => {
+      if (action === 'sit') { rest(); return; }
+      if (action === 'sleep') { show([5, 2], 'sleep'); later(() => rest(true), 450); return; }
+      const walking = action === 'walk';
+      const direction = position.current >= 0.56 ? -1 : position.current <= 0.44 ? 1 : random() < 0.5 ? -1 : 1;
+      const clip = action === 'walk' ? DOG_CLIPS[direction > 0 ? 'walkRight' : 'walkLeft'] : DOG_CLIPS[action];
+      let index = 0;
+      const tick = (): void => {
+        if (stopped) return;
+        if (index === clip.length) {
+          if (activity === 'idle') rest();
+          else show(activity === 'thinking' ? [6, 0] : [0, 0], 'sit');
+          return;
+        }
+        if (walking) position.current = Math.max(0.36, Math.min(0.64, position.current + direction * 0.008));
+        show(clip[index]!, action);
+        index += 1;
+        later(tick, walking ? 180 : 260);
+      };
+      tick();
+    };
+    const start = (): void => {
+      clear();
+      show(activity === 'thinking' ? [6, 0] : [0, 0], 'sit');
+      if (document.hidden || motion?.matches) return;
+      if (activity === 'speaking') play('wave');
+      else if (activity === 'thinking') play('look');
+      else rest();
+    };
+    document.addEventListener('visibilitychange', start);
+    motion?.addEventListener('change', start);
+    start();
     return () => {
-      active = false;
-      if (timer !== undefined) window.clearTimeout(timer);
+      stopped = true;
+      clear();
+      document.removeEventListener('visibilitychange', start);
+      motion?.removeEventListener('change', start);
     };
   }, [activity, random]);
-
-  const behaviorClass = activity === 'idle' ? `max-dog-idle-behavior-${idleBehavior}` : '';
-
-  return (
-    <div
-      className={`max-dog max-dog-${activity} ${behaviorClass}`.trim()}
-      role="img"
-      aria-label="Max，动态小狗"
-      data-testid="max-dog-sprite"
-      data-sprite-row={row}
-      data-sprite-src={spriteSrc}
-      data-idle-behavior={idleBehavior}
-      style={{ backgroundImage: `url('${spriteSrc}')` }}
-    />
-  );
+  return <div className="dog-position" style={{ left: `${pose.x * 100}%` }}>
+    <div className={`max-dog max-dog-${activity}`} role="img" aria-label="Max，动态小狗"
+      data-testid="max-dog-sprite" data-sprite-src={spriteSrc} data-idle-behavior={pose.action}
+      data-frame={`${pose.frame[0]}:${pose.frame[1]}`}
+      style={{ backgroundImage: `url('${spriteSrc}')`, backgroundPosition: `${pose.frame[1] * 100 / 7}% ${pose.frame[0] * 100 / 8}%` }} />
+  </div>;
 }

@@ -5,5 +5,5 @@ export type ProactiveEligibility = {
 };
 
 export function shouldDeliverProactiveMessage(input: ProactiveEligibility): boolean {
-  return input.enabled && input.deliveredToday < 2 && input.hasReason;
+  return input.enabled && input.hasReason;
 }

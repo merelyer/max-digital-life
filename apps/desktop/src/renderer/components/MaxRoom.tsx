@@ -26,29 +26,14 @@ export function MaxRoom(props: { memoryCount: number; activity?: RoomActivity })
         <span className={`room-pulse room-pulse-${activity}`} aria-hidden="true" />
       </div>
       <div className={`room-scene scene-${activity}`}>
-        <div className="room-backdrop" data-testid="room-backdrop" aria-hidden="true">
-          <div className="room-wall-shelf" data-testid="room-shelf"><span /><span /><span /></div>
-          <div className="room-window-view" data-testid="room-window"><i /><i /><i /></div>
-          <div className="room-plant"><span /><span /><span /></div>
-          <div className="room-poster"><b>M</b><small>stay soft</small></div>
-          <div className="room-pixel-details" data-testid="room-pixel-details" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-        </div>
-        <div className="room-sunbeam" aria-hidden="true" />
-        <div className="room-specks" data-testid="room-specks" aria-hidden="true"><i /><i /><i /><i /><i /></div>
-        <div className="desk-line" aria-hidden="true" />
-        <div className={`room-note room-note-${activity}`}>{sceneNotes[activity]}</div>
+        <img className="room-art" data-testid="room-backdrop" src="./assets/max/study-room-v2.png" width="1536" height="1024" alt="窗边有书架、绿植和书桌的像素书房，中间铺着暖色地毯" />
         <MaxDogSprite activity={activity} />
         <span className="room-activity" aria-label={activityLabels[activity]}>{activityLabels[activity]}</span>
-        <div className="room-object room-object-book" aria-hidden="true">考研<br />手记</div>
-        <div className="room-object room-object-mug" aria-hidden="true"><span>◒</span></div>
-        <div className="room-steam" data-testid="room-steam" aria-hidden="true"><i /><i /><i /></div>
-        <div className="room-floor" data-testid="room-floor" aria-hidden="true" />
-        <div className="room-carpet" aria-hidden="true" />
-        <div className="room-floor-shadow" aria-hidden="true" />
+
       </div>
       <div className="room-caption">
         <div>
-          <p className="eyebrow">MAX IS HERE</p>
+          <p className="room-description">{sceneNotes[activity]}</p>
           <h2>Max 在暖木书房等你</h2>
         </div>
         <span className={`room-status room-status-${activity}`}>{activity === 'thinking' ? '正在听你说' : activity === 'speaking' ? '正在回应' : room.mood === 'sleepy' ? '低声陪你' : '等你开口'}</span>
