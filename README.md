@@ -58,7 +58,17 @@ corepack pnpm verify:secrets
 corepack pnpm package:win
 ```
 
-安装包会出现在 `apps/desktop/release/`。安装包使用构建时写入的这三个公共值；如果 API 地址或 Supabase 项目改变，需要在打包前更新 `apps/desktop/.env` 并重新构建，再把安装包复制到图书馆的另一台 Windows 电脑。
+安装包会出现在 `apps/desktop/release/`。安装包使用构建时写入的这三个公共值；如果 API 地址或 Supabase 项目改变，需要在打包前更新 `apps/desktop/.env` 并重新构建。
+
+## Windows 云端更新
+
+Max 使用 GitHub Releases 检查 Windows 更新。发布新版本时，上传下面三个构建产物到同版本的 Release：
+
+- `Max-Setup-<version>.exe`
+- `Max-Setup-<version>.exe.blockmap`
+- `latest.yml`
+
+已安装的 Max 会在打开后检查更新；发现版本后会显示下载按钮，下载完成后可直接重启安装。仓库里的 GitHub Actions 工作流可在 Actions 页面手动运行；它需要先在仓库 Secrets 中设置 `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY` 和 `VITE_API_BASE_URL`。
 
 ## Docker API
 
