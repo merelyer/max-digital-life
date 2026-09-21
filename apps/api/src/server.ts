@@ -11,13 +11,16 @@ import { MemoryRepository } from './repositories/memory-repository.js';
 import { createSupabaseMemoryStore, createServiceClient, createSupabaseProactiveMessageStore } from './supabase.js';
 import { createPreferenceRepository } from './repositories/preference-repository.js';
 import { createProactiveMessageRepository } from './repositories/proactive-repository.js';
-import { ChatService } from './services/chat-service.js';
+import { ChatService, type ChatHistoryResponse } from './services/chat-service.js';
 import { ProactiveService } from './services/proactive-service.js';
 import { TokendanceClient } from './services/tokendance-client.js';
 
 export type ChatServerDependencies = {
   auth: AuthVerifier;
-  chatService: ChatService | { reply(input: { userId: string; conversationId: string; text: string }): Promise<{ messageId: string; text: string; savedMemory: boolean }> };
+  chatService: ChatService | {
+    reply(input: { userId: string; conversationId: string; text: string }): Promise<{ messageId: string; text: string; savedMemory: boolean }>;
+    history?: (input: { userId: string; conversationId: string }) => Promise<ChatHistoryResponse>;
+  };
 };
 
 export type ApiServerDependencies = ChatServerDependencies & Omit<ProactiveRouteDependencies, 'auth'> & { memoryRepository: Pick<MemoryRepository, 'listRelevant' | 'delete'> };

@@ -14,14 +14,16 @@ export type AppProps = { api?: ApiSurface; auth?: AuthSurface };
 
 export function App(props: AppProps): ReactElement {
   const auth = useMemo(() => props.auth ?? createDefaultAuth(), [props.auth]);
-  const api = useMemo(() => props.api ?? createDefaultApi(auth), [props.api, auth]);
   const [session, setSession] = useState<AuthSession | null | undefined>(undefined);
+  const api = useMemo(() => props.api ?? createDefaultApi(auth), [props.api, auth, session?.access_token]);
   const [memories, setMemories] = useState<ApiMemory[]>([]);
   const [messages, setMessages] = useState<TimelineMessage[]>([]);
   const [roomActivity, setRoomActivity] = useState<RoomActivity>('idle');
   const [proactiveEnabled, setProactiveEnabled] = useState(true);
   const [proactivePreferenceReady, setProactivePreferenceReady] = useState(false);
   const seenInbox = useRef(new Set<string>());
+  const activeSessionToken = useRef<string | null>(null);
+  activeSessionToken.current = session?.access_token ?? null;
 
   useEffect(() => {
     let active = true;
@@ -31,18 +33,29 @@ export function App(props: AppProps): ReactElement {
 
   useEffect(() => {
     if (!session) {
+      setMemories([]);
+      setMessages([]);
+      setRoomActivity('idle');
+      seenInbox.current.clear();
       setProactivePreferenceReady(false);
       return undefined;
     }
     let active = true;
     setProactivePreferenceReady(false);
     const loadInitialData = async (): Promise<void> => {
-      const [memoriesResult, preferenceResult] = await Promise.allSettled([api.listMemories(), api.getProactiveEnabled()]);
+      const [memoriesResult, preferenceResult, historyResult] = await Promise.allSettled([
+        api.listMemories(),
+        api.getProactiveEnabled(),
+        api.getConversationHistory ? api.getConversationHistory() : Promise.resolve({ messages: [] })
+      ]);
       if (!active) return;
       if (memoriesResult.status === 'fulfilled') setMemories(memoriesResult.value);
       if (preferenceResult.status === 'fulfilled') {
         setProactiveEnabled(preferenceResult.value.enabled);
         setProactivePreferenceReady(true);
+      }
+      if (historyResult.status === 'fulfilled') {
+        setMessages(historyResult.value.messages.map((message) => ({ id: message.id, role: message.role, text: message.content })));
       }
     };
     void loadInitialData();
@@ -89,7 +102,12 @@ export function App(props: AppProps): ReactElement {
       <UpdateNotice />
       <main className="app-grid">
         <MaxRoom memoryCount={memories.length} activity={roomActivity} />
-        <ChatPanel api={api} messages={messages} onMessagesChange={setMessages} onActivityChange={setRoomActivity} />
+        <ChatPanel api={api} messages={messages} onMessagesChange={setMessages} onActivityChange={setRoomActivity} onMemorySaved={() => {
+          const tokenAtRequest = activeSessionToken.current;
+          void api.listMemories().then((next) => {
+            if (tokenAtRequest && activeSessionToken.current === tokenAtRequest) setMemories(next);
+          }).catch(() => undefined);
+        }} />
       </main>
       <footer className="utility-grid">
         <MemoryPanel api={api} memories={memories} onMemoriesChange={setMemories} />

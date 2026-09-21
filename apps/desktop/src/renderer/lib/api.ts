@@ -1,5 +1,8 @@
 export type ChatResponse = { messageId: string; text: string; savedMemory: boolean };
 
+export type ConversationHistoryMessage = { id: string; role: 'user' | 'assistant'; content: string; createdAt: string };
+export type ConversationHistory = { messages: ConversationHistoryMessage[] };
+
 export type ApiMemory = {
   id: string;
   userId: string;
@@ -12,7 +15,7 @@ export type ApiMemory = {
 export type ApiProactiveMessage = {
   id: string;
   userId: string;
-  reason: 'evening_check_in' | 'unfinished_topic';
+  reason: 'random_check_in' | 'evening_check_in' | 'unfinished_topic';
   content: string;
   sourceTimestamp: string;
   deliveredAt: string;
@@ -56,6 +59,10 @@ export class ApiClient {
 
   public sendChat(text: string): Promise<ChatResponse> {
     return this.request<ChatResponse>('/v1/chat', { method: 'POST', body: { conversationId: this.conversationId, text } });
+  }
+
+  public getConversationHistory(): Promise<ConversationHistory> {
+    return this.request<ConversationHistory>(`/v1/chat/history?conversationId=${encodeURIComponent(this.conversationId)}`);
   }
 
   public listMemories(): Promise<ApiMemory[]> {

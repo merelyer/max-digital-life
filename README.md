@@ -9,7 +9,7 @@ Max 是住在 Windows 桌面里的白色小狗：你可以主动找他聊天，�
 - 一个 Supabase 项目
 - 一个 Tokendance 账户和从其模型页“复制模型 ID”得到的真实模型标识
 
-在 Supabase 中创建项目，并在 SQL Editor 中执行 [`apps/api/supabase/migrations/0001_max.sql`](apps/api/supabase/migrations/0001_max.sql)。在 Authentication 中启用 Email 登录。然后复制根目录的 `.env.example` 为 `.env`，填写服务端变量：
+在 Supabase 中创建项目，并在 SQL Editor 中依次执行 [`apps/api/supabase/migrations/0001_max.sql`](apps/api/supabase/migrations/0001_max.sql) 与 [`apps/api/supabase/migrations/0002_random_proactive_reason.sql`](apps/api/supabase/migrations/0002_random_proactive_reason.sql)。已有项目只需补执行 0002。在 Authentication 中启用 Email 登录。然后复制根目录的 `.env.example` 为 `.env`，填写服务端变量：
 
 ```text
 SUPABASE_URL=
@@ -68,7 +68,7 @@ Max 使用 GitHub Releases 检查 Windows 更新。发布新版本时，上传�
 - `Max-Setup-<version>.exe.blockmap`
 - `latest.yml`
 
-已安装的 Max 会在打开后检查更新；发现版本后会显示下载按钮，下载完成后可直接重启安装。仓库里的 GitHub Actions 工作流可在 Actions 页面手动运行；它需要先在仓库 Secrets 中设置 `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY` 和 `VITE_API_BASE_URL`。
+已安装的 Max 会在启动、窗口重新回到前台以及运行期间定期检查更新；发现版本后会显示下载按钮，下载完成后可直接重启安装。仓库里的 GitHub Actions 工作流可在 Actions 页面手动运行；它需要先在仓库 Secrets 中设置 `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY` 和 `VITE_API_BASE_URL`。
 
 ## Docker API
 

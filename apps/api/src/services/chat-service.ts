@@ -1,8 +1,9 @@
 import { memoryKinds, isMemoryDraft, type MemoryDraft } from '@max/domain';
 import { z } from 'zod';
 import type { ConversationRepository } from '../repositories/conversation-repository.js';
+import type { ConversationMessage } from '../repositories/conversation-repository.js';
 import type { MemoryRecord, MemoryRepository } from '../repositories/memory-repository.js';
-import { MemoryUnavailableError, ModelUnavailableError } from './errors.js';
+import { ConversationAccessError, MemoryUnavailableError, ModelUnavailableError } from './errors.js';
 
 export type ChatMessage = {
   role: 'system' | 'user' | 'assistant';
@@ -23,6 +24,8 @@ export type ChatResponse = {
   text: string;
   savedMemory: boolean;
 };
+
+export type ChatHistoryResponse = { messages: ConversationMessage[] };
 
 type ChatServiceDependencies = {
   model: ChatModel;
@@ -61,17 +64,21 @@ export class ChatService {
     if (!text) throw new MemoryUnavailableError(new Error('Empty chat text.'));
 
     let memories: MemoryRecord[];
+    let history: ConversationMessage[];
     try {
       await this.dependencies.conversationRepository.ensure(input.userId, input.conversationId);
+      history = await this.dependencies.conversationRepository.listMessages(input.userId, input.conversationId, 20);
       await this.dependencies.conversationRepository.appendMessage(input.userId, input.conversationId, 'user', text);
       memories = await this.dependencies.memoryRepository.listRelevant(input.userId, text);
     } catch (error) {
+      if (error instanceof ConversationAccessError) throw error;
       throw new MemoryUnavailableError(error);
     }
 
     const messages: ChatMessage[] = [
       { role: 'system', content: maxSystemPrompt },
       { role: 'system', content: formatMemoryContext(memories) },
+      ...history.map((message) => ({ role: message.role, content: message.content })),
       { role: 'user', content: text }
     ];
 
@@ -93,6 +100,16 @@ export class ChatService {
 
     const savedMemory = await this.extractAndSave(input.userId, text, responseText);
     return { messageId, text: responseText, savedMemory };
+  }
+
+  public async history(input: { userId: string; conversationId: string }): Promise<ChatHistoryResponse> {
+    try {
+      await this.dependencies.conversationRepository.ensure(input.userId, input.conversationId);
+      return { messages: await this.dependencies.conversationRepository.listMessages(input.userId, input.conversationId, 30) };
+    } catch (error) {
+      if (error instanceof ConversationAccessError) throw error;
+      throw new MemoryUnavailableError(error);
+    }
   }
 
   private async extractAndSave(userId: string, userText: string, assistantText: string): Promise<boolean> {
@@ -122,8 +139,10 @@ export class ChatService {
     try {
       await this.dependencies.memoryRepository.create(userId, draft);
       return true;
-    } catch (error) {
-      throw new MemoryUnavailableError(error);
+    } catch {
+      // The assistant reply is already useful even when the optional long-term
+      // memory write is temporarily unavailable.
+      return false;
     }
   }
 }

@@ -12,7 +12,7 @@ const runSchema = z.object({
   timezone: z.string().trim().min(1),
   deliveredToday: z.number().int().min(0),
   enabled: z.boolean(),
-  reason: z.enum(['evening_check_in', 'unfinished_topic']).optional(),
+  reason: z.enum(['random_check_in', 'evening_check_in', 'unfinished_topic']).optional(),
   sourceTimestamp: z.string().trim().min(1).optional()
 }).strict();
 
@@ -60,8 +60,10 @@ export function registerProactiveRoutes(app: FastifyInstance, dependencies: Proa
       const preference = await dependencies.preferenceRepository.get(userId);
       const day = localDayBounds(now, timezone);
       const deliveredToday = await dependencies.proactiveRepository.countDeliveredSince(userId, day.start.toISOString(), day.end.toISOString());
-      const hour = localHour(now, timezone);
-      const reason = hour >= 18 && hour < 23 ? 'evening_check_in' as const : undefined;
+      // The desktop client checks at a random interval. The server deliberately
+      // does not impose a daily count cap; it only records the local day for
+      // observability and future policy changes.
+      const reason = 'random_check_in' as const;
       const message = await dependencies.proactiveService.runForUser({ userId, timezone, deliveredToday, enabled: preference.proactiveEnabled, reason, sourceTimestamp: now.toISOString() });
       await reply.code(200).send({ delivered: Boolean(message), message });
     } catch (error) {
@@ -124,11 +126,6 @@ export function registerProactiveRoutes(app: FastifyInstance, dependencies: Proa
       await reply.code(503).send({ code: 'MEMORY_UNAVAILABLE', message: '主动消息设置暂时无法读取。' });
     }
   });
-}
-
-function localHour(date: Date, timezone: string): number {
-  const hour = new Intl.DateTimeFormat('en-US', { timeZone: timezone, hour: '2-digit', hourCycle: 'h23' }).formatToParts(date).find((part) => part.type === 'hour')?.value;
-  return hour ? Number(hour) : 0;
 }
 
 function localDayBounds(date: Date, timezone: string): { start: Date; end: Date } {

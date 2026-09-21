@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import type { ApiSurface, RoomActivity, TimelineMessage } from '../types';
 
-export function ChatPanel(props: { api: ApiSurface; messages: TimelineMessage[]; onMessagesChange: (messages: TimelineMessage[]) => void; onActivityChange?: (activity: RoomActivity) => void }): ReactElement {
+type MessageUpdate = TimelineMessage[] | ((current: TimelineMessage[]) => TimelineMessage[]);
+
+export function ChatPanel(props: { api: ApiSurface; messages: TimelineMessage[]; onMessagesChange: (update: MessageUpdate) => void; onActivityChange?: (activity: RoomActivity) => void; onMemorySaved?: () => void }): ReactElement {
   const [text, setText] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,11 +20,12 @@ export function ChatPanel(props: { api: ApiSurface; messages: TimelineMessage[];
     setError(null);
     props.onActivityChange?.('thinking');
     const userMessage: TimelineMessage = { id: `user-${Date.now()}`, role: 'user', text: trimmed };
-    props.onMessagesChange([...props.messages, userMessage]);
+    props.onMessagesChange((current) => [...current, userMessage]);
     setText('');
     try {
       const response = await props.api.sendChat(trimmed);
-      props.onMessagesChange([...props.messages, userMessage, { id: response.messageId, role: 'assistant', text: response.text }]);
+      props.onMessagesChange((current) => [...current, { id: response.messageId, role: 'assistant', text: response.text }]);
+      if (response.savedMemory) props.onMemorySaved?.();
       props.onActivityChange?.('speaking');
       activityTimer.current = window.setTimeout(() => {
         props.onActivityChange?.('idle');
@@ -58,7 +61,7 @@ export function ChatPanel(props: { api: ApiSurface; messages: TimelineMessage[];
       {error ? <p className="chat-error" role="alert">{error}</p> : null}
       <div className="composer">
         <label className="sr-only" htmlFor="chat-input">和 Max 说点什么</label>
-        <textarea id="chat-input" aria-label="和 Max 说点什么" value={text} onChange={(event) => setText(event.target.value)} placeholder="写下此刻，不用想得太完整…" rows={2} disabled={pending} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void send(); } }} />
+        <textarea id="chat-input" aria-label="和 Max 说点什么" value={text} onChange={(event) => setText(event.target.value)} placeholder="写下此刻，不用想得太完整…" rows={2} disabled={pending} onKeyDown={(event) => { if (event.nativeEvent.isComposing) return; if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void send(); } }} />
         <button className="send-button" type="button" onClick={() => { void send(); }} disabled={pending || !text.trim()} aria-label="发送">{pending ? '…' : '发送'}</button>
       </div>
     </section>

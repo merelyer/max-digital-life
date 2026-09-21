@@ -1,4 +1,4 @@
-export type ProactiveReason = 'evening_check_in' | 'unfinished_topic';
+export type ProactiveReason = 'random_check_in' | 'evening_check_in' | 'unfinished_topic';
 
 export type ProactiveMessage = {
   id: string;

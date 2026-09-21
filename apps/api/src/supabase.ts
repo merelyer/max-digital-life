@@ -17,8 +17,7 @@ export function createSupabaseMemoryStore(client: ServiceClient): MemoryStore {
         .select('id,user_id,content,kind,importance,created_at')
         .eq('user_id', userId)
         .order('importance', { ascending: false })
-        .order('created_at', { ascending: false })
-        .limit(12);
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return (data ?? []).map(toMemoryRecord);
     },

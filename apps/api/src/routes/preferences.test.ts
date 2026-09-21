@@ -76,7 +76,7 @@ describe('proactive and preference routes', () => {
     await app.close();
   });
 
-  it('checks the user-local evening window without exposing the cron secret', async () => {
+  it('checks the user-local day without imposing an evening-only window', async () => {
     const runForUser = vi.fn(async () => null);
     const countDeliveredSince = vi.fn(async () => 1);
     const app = Fastify();
@@ -92,7 +92,7 @@ describe('proactive and preference routes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(countDeliveredSince).toHaveBeenCalledOnce();
-    expect(runForUser).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u-1', timezone: 'Asia/Shanghai', deliveredToday: 1, enabled: true }));
+    expect(runForUser).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u-1', timezone: 'Asia/Shanghai', deliveredToday: 1, enabled: true, reason: 'random_check_in' }));
     await app.close();
   });
 });

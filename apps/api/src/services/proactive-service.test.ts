@@ -49,4 +49,24 @@ describe('ProactiveService', () => {
     expect(create).toHaveBeenCalledWith('u-1', expect.objectContaining({ reason: 'unfinished_topic', sourceTimestamp: '2026-09-19T11:30:00.000Z', deliveredAt: '2026-09-19T12:00:00.000Z' }));
     expect(result?.content).toContain('喝口水');
   });
+
+  it('does not generate duplicate messages for concurrent checks of one user', async () => {
+    const { repository, create } = makeRepository();
+    const releases: Array<() => void> = [];
+    const model: ChatModel = {
+      complete: vi.fn(() => new Promise<string>((resolve) => {
+        releases.push(() => resolve('只生成一条。'));
+      }))
+    };
+    const service = new ProactiveService({ repository, model });
+
+    const first = service.runForUser({ userId: 'u-1', timezone: 'Asia/Shanghai', deliveredToday: 0, enabled: true, reason: 'random_check_in' });
+    const second = service.runForUser({ userId: 'u-1', timezone: 'Asia/Shanghai', deliveredToday: 0, enabled: true, reason: 'random_check_in' });
+    await Promise.resolve();
+    releases.forEach((release) => release());
+
+    await expect(first).resolves.toMatchObject({ content: '只生成一条。' });
+    await expect(second).resolves.toBeNull();
+    expect(create).toHaveBeenCalledTimes(1);
+  });
 });

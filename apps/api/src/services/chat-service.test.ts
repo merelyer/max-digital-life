@@ -8,6 +8,7 @@ function makeConversationRepository(): ConversationRepository & { messages: stri
   return {
     messages,
     ensure: async () => undefined,
+    listMessages: async () => [],
     appendMessage: async (_userId, _conversationId, _role, content) => {
       messages.push(content);
       return `message-${messages.length}`;
@@ -65,5 +66,54 @@ describe('ChatService', () => {
     });
 
     await expect(service.reply({ userId: 'u-1', conversationId: 'c-1', text: '我有点累。' })).resolves.toMatchObject({ savedMemory: false });
+  });
+
+  it('gives Max bounded prior conversation context before the new message', async () => {
+    const model: ChatModel & { calls: Array<{ messages: Array<{ role: string; content: string }> }> } = {
+      calls: [],
+      complete: async ({ messages }) => {
+        model.calls.push({ messages });
+        return model.calls.length === 1 ? '我记得你刚才提到高数。' : JSON.stringify({ save: false, content: '', kind: 'study', importance: 1 });
+      }
+    };
+    const conversationRepository = makeConversationRepository();
+    conversationRepository.listMessages = async () => [
+      { id: 'old-user', role: 'user', content: '我刚做完一套高数题。', createdAt: '2026-09-20T10:00:00.000Z' },
+      { id: 'old-assistant', role: 'assistant', content: '辛苦了，错题先标出来。', createdAt: '2026-09-20T10:00:01.000Z' }
+    ];
+    const service = new ChatService({
+      model,
+      conversationRepository,
+      memoryRepository: { listRelevant: async () => [], create: async () => { throw new Error('unused'); } }
+    });
+
+    await service.reply({ userId: 'u-1', conversationId: 'c-1', text: '现在有点累。' });
+
+    expect(model.calls[0]?.messages.map((message) => message.content)).toEqual([
+      expect.stringContaining('你是 Max'),
+      '相关长期记忆：暂无。',
+      '我刚做完一套高数题。',
+      '辛苦了，错题先标出来。',
+      '现在有点累。'
+    ]);
+  });
+
+  it('keeps the generated reply when saving a memory fails', async () => {
+    let completion = 0;
+    const model: ChatModel = {
+      complete: async () => {
+        completion += 1;
+        return completion === 1
+          ? '先休息五分钟。'
+          : JSON.stringify({ save: true, content: '用户正在准备考研。', kind: 'study', importance: 4 });
+      }
+    };
+    const service = new ChatService({
+      model,
+      conversationRepository: makeConversationRepository(),
+      memoryRepository: { listRelevant: async () => [], create: async () => { throw new Error('database temporarily unavailable'); } }
+    });
+
+    await expect(service.reply({ userId: 'u-1', conversationId: 'c-1', text: '我今天准备考研。' })).resolves.toMatchObject({ text: '先休息五分钟。', savedMemory: false });
   });
 });

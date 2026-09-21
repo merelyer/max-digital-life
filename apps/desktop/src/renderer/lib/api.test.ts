@@ -40,4 +40,12 @@ describe('ApiClient', () => {
 
     await expect(client.sendChat('晚上好')).rejects.toThrow('Max 暂时连不上，稍后再试。');
   });
+
+  it('loads bounded conversation history for the current conversation', async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ messages: [{ id: 'm-1', role: 'user', content: '你好', createdAt: '2026-09-20T10:00:00.000Z' }] }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    const client = new ApiClient({ baseURL: 'https://api.example.test', getAccessToken: async () => 'user-token', conversationId: 'c-1', fetchImpl: fetchMock });
+
+    await expect(client.getConversationHistory()).resolves.toEqual({ messages: [{ id: 'm-1', role: 'user', content: '你好', createdAt: '2026-09-20T10:00:00.000Z' }] });
+    expect(fetchMock).toHaveBeenCalledWith('https://api.example.test/v1/chat/history?conversationId=c-1', expect.objectContaining({ method: 'GET' }));
+  });
 });

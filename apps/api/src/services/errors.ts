@@ -11,3 +11,10 @@ export class MemoryUnavailableError extends Error {
     this.name = 'MemoryUnavailableError';
   }
 }
+
+export class ConversationAccessError extends Error {
+  public constructor() {
+    super('The conversation belongs to another user.');
+    this.name = 'ConversationAccessError';
+  }
+}

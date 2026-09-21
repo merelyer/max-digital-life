@@ -4,6 +4,7 @@ import type { ApiClient, ApiMemory, ApiProactiveMessage, ChatResponse } from './
 export type AuthSurface = Pick<AuthClient, 'getSession' | 'signIn' | 'signUp' | 'signOut'>;
 
 export type ApiSurface = Pick<ApiClient, 'sendChat' | 'listMemories' | 'deleteMemory' | 'getInbox' | 'checkProactive' | 'setProactiveEnabled' | 'getProactiveEnabled'> & {
+  getConversationHistory?: ApiClient['getConversationHistory'];
   dismissProactive?: (id: string) => Promise<void>;
 };
 
