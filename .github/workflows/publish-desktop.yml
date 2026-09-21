@@ -24,9 +24,20 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-      - run: pnpm --filter @max/desktop exec electron-builder --win nsis --publish always
+      - run: pnpm --filter @max/desktop exec electron-builder --win nsis --publish never
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = node -p "require('./apps/desktop/package.json').version"
+          $assets = @(
+            "apps/desktop/release/Max-Setup-$version.exe",
+            "apps/desktop/release/Max-Setup-$version.exe.blockmap",
+            "apps/desktop/release/latest.yml"
+          )
+          gh release create "v$version" $assets --target $env:GITHUB_SHA --title "Max $version" --notes "Max $version Windows installer" --latest
